@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: orgstructure-postgres
+    environment:
+      POSTGRES_USER: orgstructure
+      POSTGRES_PASSWORD: orgstructure
+      POSTGRES_DB: orgstructure
+    ports:
+      # Host-side 55432 keeps us off the default 5432, so the stack does not
+      # collide with a local Postgres install. Inside the docker network the
+      # API still reaches the DB at postgres:5432.
+      - "55432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orgstructure -d orgstructure"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: orgstructure-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      HTTP_ADDR: ":8080"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USER: orgstructure
+      DB_PASSWORD: orgstructure
+      DB_NAME: orgstructure
+      DB_SSLMODE: disable
+      MIGRATIONS_DIR: /app/migrations
+      RUN_MIGRATIONS_ON_START: "true"
+      LOG_LEVEL: info
+      LOG_FORMAT: json
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

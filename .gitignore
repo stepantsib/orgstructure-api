@@ -1,0 +1,30 @@
+# Binaries
+/api
+/bin/
+*.exe
+*.out
+
+# Go test cache
+*.test
+
+# Coverage
+coverage.out
+coverage.html
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+
+# Docker
+docker-data/
+
+# Claude Code local settings
+.claude/
